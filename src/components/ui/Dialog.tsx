@@ -48,8 +48,9 @@ export function DialogContent({
         className="
           fixed inset-0 z-50
           bg-black/70 backdrop-blur-sm
-          data-[state=open]:animate-in data-[state=closed]:animate-out
-          data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0
+          transition-opacity duration-200
+          data-[starting-style]:opacity-0
+          data-[ending-style]:opacity-0
         "
       />
       <BaseDialog.Popup
@@ -60,15 +61,15 @@ export function DialogContent({
           flex flex-col
 
           ${fullScreen ? `
-            /* Full screen */
             inset-0
+            transition-opacity duration-200
+            data-[starting-style]:opacity-0
+            data-[ending-style]:opacity-0
           ` : `
-            /* Mobile: bottom sheet */
             bottom-0 left-0 right-0
             max-md:rounded-t-3xl
             max-md:max-h-[85vh]
 
-            /* Desktop: centered modal */
             md:bottom-auto md:right-auto
             md:top-[50%] md:left-[50%]
             md:translate-x-[-50%] md:translate-y-[-50%]
@@ -76,31 +77,22 @@ export function DialogContent({
             md:rounded-2xl
             md:max-h-[90vh]
 
-            /* Common - use overflow-hidden, inner div scrolls */
             overflow-hidden
+
+            transition-all duration-200
+
+            opacity-100
+            data-[starting-style]:opacity-0
+            data-[ending-style]:opacity-0
+
+            max-md:translate-y-0
+            max-md:data-[starting-style]:translate-y-full
+            max-md:data-[ending-style]:translate-y-full
+
+            md:scale-100
+            md:data-[starting-style]:scale-95
+            md:data-[ending-style]:scale-95
           `}
-
-          /* Animations */
-          data-[state=open]:animate-in
-          data-[state=closed]:animate-out
-          data-[state=closed]:fade-out-0
-          data-[state=open]:fade-in-0
-
-          ${!fullScreen ? `
-            /* Desktop animations */
-            md:data-[state=closed]:zoom-out-95
-            md:data-[state=open]:zoom-in-95
-            md:data-[state=closed]:slide-out-to-left-1/2
-            md:data-[state=closed]:slide-out-to-top-[48%]
-            md:data-[state=open]:slide-in-from-left-1/2
-            md:data-[state=open]:slide-in-from-top-[48%]
-
-            /* Mobile animations */
-            max-md:data-[state=closed]:slide-out-to-bottom
-            max-md:data-[state=open]:slide-in-from-bottom
-          ` : ''}
-
-          duration-200
 
           ${className}
         `}

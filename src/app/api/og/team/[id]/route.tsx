@@ -3,6 +3,24 @@ import { decodeShareData, getTeamMembersFromIndices, formatRunwayForShare } from
 
 export const runtime = 'edge';
 
+const fontCache = new Map<string, Promise<ArrayBuffer>>();
+
+function loadFont(origin: string, path: string): Promise<ArrayBuffer> {
+  const url = `${origin}${path}`;
+  if (!fontCache.has(url)) {
+    fontCache.set(
+      url,
+      fetch(url).then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load font ${path}: ${res.status}`);
+        }
+        return res.arrayBuffer();
+      })
+    );
+  }
+  return fontCache.get(url)!;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -21,8 +39,18 @@ export async function GET(
     }
 
     const runwayText = formatRunwayForShare(data.r);
+    const summaryText = `"${data.s}"`;
+    const sabotageText = `Sabotaged in ${runwayText}`;
     const baseUrl = 'https://series-a-sabotage.vercel.app';
     const photos = teamMembers.slice(0, 8);
+    const origin = new URL(request.url).origin;
+    const [dmSansRegular, dmSansBold, instrumentSerifRegular, instrumentSerifItalic] =
+      await Promise.all([
+        loadFont(origin, '/fonts/DM_Sans/static/DMSans-Regular.ttf'),
+        loadFont(origin, '/fonts/DM_Sans/static/DMSans-Bold.ttf'),
+        loadFont(origin, '/fonts/Instrument_Serif/InstrumentSerif-Regular.ttf'),
+        loadFont(origin, '/fonts/Instrument_Serif/InstrumentSerif-Italic.ttf'),
+      ]);
 
     return new ImageResponse(
     (
@@ -36,14 +64,16 @@ export async function GET(
           justifyContent: 'center',
           backgroundColor: '#F6FF00',
           padding: '40px',
+          fontFamily: 'DM Sans',
         }}
       >
         <div
           style={{
             fontSize: '48px',
-            fontWeight: 'bold',
+            fontWeight: 400,
             color: '#0038FF',
             marginBottom: '24px',
+            fontFamily: 'Instrument Serif',
           }}
         >
           {data.n}
@@ -69,7 +99,7 @@ export async function GET(
                 paddingBottom: '14px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                 marginLeft: i === 0 ? '0' : '-20px',
-                zIndex: i,
+                zIndex: String(i),
               }}
             >
               <img
@@ -86,6 +116,7 @@ export async function GET(
         <div
           style={{
             fontSize: '24px',
+            fontWeight: 400,
             color: '#0038FF',
             textAlign: 'center',
             maxWidth: '900px',
@@ -93,26 +124,28 @@ export async function GET(
             padding: '0 40px',
           }}
         >
-          &quot;{data.s}&quot;
+          {summaryText}
         </div>
 
         <div
           style={{
             fontSize: '32px',
-            fontWeight: 'bold',
+            fontWeight: 700,
             color: data.r < 3 ? '#dc2626' : '#0038FF',
           }}
         >
-          Sabotaged in {runwayText}
+          {sabotageText}
         </div>
 
         <div
           style={{
             position: 'absolute',
             bottom: '24px',
-            fontSize: '18px',
+            fontSize: '24px',
+            fontWeight: 400,
             color: '#0038FF',
-            opacity: 0.5,
+            opacity: 0.9,
+            fontFamily: 'Instrument Serif',
           }}
         >
           Series A Sabotage
@@ -122,6 +155,32 @@ export async function GET(
     {
       width: 1200,
       height: 630,
+      fonts: [
+        {
+          name: 'DM Sans',
+          data: dmSansRegular,
+          weight: 400,
+          style: 'normal',
+        },
+        {
+          name: 'DM Sans',
+          data: dmSansBold,
+          weight: 700,
+          style: 'normal',
+        },
+        {
+          name: 'Instrument Serif',
+          data: instrumentSerifRegular,
+          weight: 400,
+          style: 'normal',
+        },
+        {
+          name: 'Instrument Serif',
+          data: instrumentSerifItalic,
+          weight: 400,
+          style: 'italic',
+        },
+      ],
     }
     );
   } catch (e) {
