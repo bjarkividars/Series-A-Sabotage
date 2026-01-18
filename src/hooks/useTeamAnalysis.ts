@@ -7,6 +7,7 @@ type AnalysisMode = 'roast' | 'praise';
 
 interface UseTeamAnalysisReturn {
   analysis: string;
+  oneLineSummary: string | null;
   isLoading: boolean;
   mode: AnalysisMode | null;
   generateAnalysis: (
@@ -18,8 +19,11 @@ interface UseTeamAnalysisReturn {
   resetAnalysis: () => void;
 }
 
+const METADATA_DELIMITER = '\n---\n';
+
 export function useTeamAnalysis(): UseTeamAnalysisReturn {
   const [analysis, setAnalysis] = useState('');
+  const [oneLineSummary, setOneLineSummary] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<AnalysisMode | null>(null);
 
@@ -32,6 +36,7 @@ export function useTeamAnalysis(): UseTeamAnalysisReturn {
     ) => {
       setIsLoading(true);
       setAnalysis('');
+      setOneLineSummary(null);
       setMode(analysisMode);
 
       try {
@@ -56,13 +61,37 @@ export function useTeamAnalysis(): UseTeamAnalysisReturn {
         }
 
         const decoder = new TextDecoder();
+        let buffer = '';
+        let metadataParsed = false;
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
           const text = decoder.decode(value, { stream: true });
-          setAnalysis((prev) => prev + text);
+          buffer += text;
+
+          if (!metadataParsed) {
+            const delimiterIndex = buffer.indexOf(METADATA_DELIMITER);
+            if (delimiterIndex !== -1) {
+              const metadataStr = buffer.slice(0, delimiterIndex);
+              try {
+                const metadata = JSON.parse(metadataStr);
+                setOneLineSummary(metadata.oneLineSummary || null);
+              } catch {
+                console.error('Failed to parse metadata');
+              }
+              metadataParsed = true;
+              const remaining = buffer.slice(delimiterIndex + METADATA_DELIMITER.length);
+              if (remaining) {
+                setAnalysis(remaining);
+              }
+              buffer = '';
+            }
+          } else {
+            setAnalysis((prev) => prev + text);
+            buffer = '';
+          }
         }
       } catch (error) {
         console.error('Error generating analysis:', error);
@@ -76,9 +105,10 @@ export function useTeamAnalysis(): UseTeamAnalysisReturn {
 
   const resetAnalysis = useCallback(() => {
     setAnalysis('');
+    setOneLineSummary(null);
     setMode(null);
     setIsLoading(false);
   }, []);
 
-  return { analysis, isLoading, mode, generateAnalysis, resetAnalysis };
+  return { analysis, oneLineSummary, isLoading, mode, generateAnalysis, resetAnalysis };
 }

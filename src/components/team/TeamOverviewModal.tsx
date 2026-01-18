@@ -5,7 +5,9 @@ import { useTeam } from '@/contexts/TeamContext';
 import { Dialog } from '@/components/ui/Dialog';
 import { PhotoCollage } from './PhotoCollage';
 import { WarpAd } from './WarpAd';
+import { ShareModal } from './ShareModal';
 import { useTeamAnalysis } from '@/hooks/useTeamAnalysis';
+import { encodeShareData, formatRunwayForShare } from '@/lib/share';
 
 interface TeamOverviewModalProps {
   open: boolean;
@@ -14,8 +16,9 @@ interface TeamOverviewModalProps {
 
 export function TeamOverviewModal({ open, onOpenChange }: TeamOverviewModalProps) {
   const { selectedTeam, startupName, runway, removeMember, resetTeam } = useTeam();
-  const { analysis, isLoading, mode, generateAnalysis, resetAnalysis } = useTeamAnalysis();
+  const { analysis, oneLineSummary, isLoading, mode, generateAnalysis, resetAnalysis } = useTeamAnalysis();
   const [showAd, setShowAd] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleRemoveMember = (id: string) => {
     removeMember(id);
@@ -25,7 +28,26 @@ export function TeamOverviewModal({ open, onOpenChange }: TeamOverviewModalProps
   };
 
   const handleShare = () => {
-    // TODO: Implement share functionality
+    if (!oneLineSummary || !mode) return;
+    setShowShareModal(true);
+  };
+
+  const getShareUrl = () => {
+    if (!oneLineSummary || !mode) return '';
+    const encoded = encodeShareData(
+      selectedTeam.map(m => m.id),
+      startupName,
+      oneLineSummary,
+      mode,
+      runway
+    );
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${baseUrl}/share/${encoded}`;
+  };
+
+  const getTweetText = () => {
+    const runwayText = formatRunwayForShare(runway);
+    return `My ${startupName} dream team was sabotaged in ${runwayText}! "${oneLineSummary}"`;
   };
 
   const getRunwayDisplay = () => {
@@ -102,6 +124,7 @@ export function TeamOverviewModal({ open, onOpenChange }: TeamOverviewModalProps
   }, [isComplete]);
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Dialog.Content
         description="View your assembled team"
@@ -229,5 +252,13 @@ export function TeamOverviewModal({ open, onOpenChange }: TeamOverviewModalProps
         </div>
       </Dialog.Content>
     </Dialog>
+
+    <ShareModal
+      open={showShareModal}
+      onOpenChange={setShowShareModal}
+      shareUrl={getShareUrl()}
+      tweetText={getTweetText()}
+    />
+  </>
   );
 }

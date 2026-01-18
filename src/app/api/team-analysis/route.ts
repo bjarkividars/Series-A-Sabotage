@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import { zodTextFormat } from 'openai/helpers/zod.mjs';
+import z from 'zod';
 
 const openai = new OpenAI();
 
@@ -60,6 +62,18 @@ Team (${team.length} members):
 ${teamList}`;
 }
 
+const ResponseFormat = z.object({
+  oneLineSummary: z.string().describe('A one-line summary of the team'),
+});
+
+const RoastResponseFormat = ResponseFormat.extend({
+  roast: z.string().describe('A roast of the team'),
+});
+
+const PraiseResponseFormat = ResponseFormat.extend({
+  praise: z.string().describe('A praise of the team'),
+});
+
 export async function POST(request: Request) {
   const { team, mode, startupName, runway }: RequestBody = await request.json();
 
@@ -73,20 +87,74 @@ export async function POST(request: Request) {
   const stream = await openai.responses.create({
     model: 'gpt-4.1-mini',
     instructions,
-
     input: teamSummary,
+    text: {
+      format: zodTextFormat(mode === 'roast' ? RoastResponseFormat : PraiseResponseFormat, 'text'),
 
-    stream: true,
+    }, stream: true
   });
+
+
 
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      let accumulatedText = '';
+      let lastProcessedLength = 0;
+      let sentMetadata = false;
+      const targetField = mode;
+      const fieldPattern = new RegExp(`"${targetField}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)`, 's');
+      const summaryPattern = /"oneLineSummary"\s*:\s*"((?:[^"\\]|\\.)*)"/;
+
+      const decodeJsonString = (raw: string) => {
+        return raw.replace(/\\(.)/g, (_, char) => {
+          switch (char) {
+            case 'n': return '\n';
+            case 't': return '\t';
+            case 'r': return '\r';
+            case '"': return '"';
+            case '\\': return '\\';
+            default: return char;
+          }
+        });
+      };
+
       for await (const event of stream) {
         if (event.type === 'response.output_text.delta') {
-          controller.enqueue(encoder.encode(event.delta));
+          accumulatedText += event.delta;
+
+          if (!sentMetadata) {
+            const summaryMatch = accumulatedText.match(summaryPattern);
+            if (summaryMatch && summaryMatch[1]) {
+              const oneLineSummary = decodeJsonString(summaryMatch[1]);
+              controller.enqueue(encoder.encode(JSON.stringify({ oneLineSummary }) + '\n---\n'));
+              sentMetadata = true;
+            }
+          }
+
+          const match = accumulatedText.match(fieldPattern);
+          if (match && match[1]) {
+            const rawContent = match[1];
+
+            let trailingBackslashes = 0;
+            for (let i = rawContent.length - 1; i >= 0 && rawContent[i] === '\\'; i--) {
+              trailingBackslashes++;
+            }
+            const processableLength = trailingBackslashes % 2 === 1
+              ? rawContent.length - 1
+              : rawContent.length;
+
+            if (processableLength > lastProcessedLength) {
+              const newRaw = rawContent.slice(lastProcessedLength, processableLength);
+              const decoded = decodeJsonString(newRaw);
+
+              controller.enqueue(encoder.encode(decoded));
+              lastProcessedLength = processableLength;
+            }
+          }
         }
       }
+
       controller.close();
     },
   });
