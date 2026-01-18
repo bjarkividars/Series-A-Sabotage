@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
+import { useTeam } from '@/contexts/TeamContext';
+import { getWarpUrl } from '@/lib/warp-url';
 
 interface CountdownAdProps {
   runway: number;
@@ -40,6 +42,7 @@ function formatRunway(runway: number): string {
 
 export function CountdownAd({ runway, isStuck }: CountdownAdProps) {
   const [dismissed, setDismissed] = useState(false);
+  const { startingCapital } = useTeam();
   const formattedRunway = formatRunway(runway);
 
   if (dismissed) return null;
@@ -78,7 +81,7 @@ export function CountdownAd({ runway, isStuck }: CountdownAdProps) {
           understand burn, and see how every hire affects your runway—before it&apos;s too late.
         </p>
         <a
-          href="https://www.joinwarp.com"
+          href={getWarpUrl(startingCapital)}
           target="_blank"
           rel="noopener noreferrer"
           className="

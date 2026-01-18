@@ -2,6 +2,8 @@
 
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
+import { useTeam } from '@/contexts/TeamContext';
+import { getWarpUrl } from '@/lib/warp-url';
 
 interface WarpAdProps {
   mode: 'roast' | 'praise';
@@ -10,6 +12,8 @@ interface WarpAdProps {
 }
 
 export function WarpAd({ mode, visible, onDismiss }: WarpAdProps) {
+  const { startingCapital } = useTeam();
+
   const headline =
     mode === 'praise'
       ? 'Build a team that actually works this well'
@@ -55,7 +59,7 @@ export function WarpAd({ mode, visible, onDismiss }: WarpAdProps) {
           burn, and extend your runway.
         </p>
         <a
-          href="https://www.joinwarp.com"
+          href={getWarpUrl(startingCapital)}
           target="_blank"
           rel="noopener noreferrer"
           className="
