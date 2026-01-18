@@ -7,18 +7,24 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const data = decodeShareData(id);
+  try {
+    const { id } = await params;
+    const data = decodeShareData(id);
 
-  if (!data) {
-    return new Response('Not found', { status: 404 });
-  }
+    if (!data) {
+      return new Response('Invalid share data', { status: 400 });
+    }
 
-  const teamMembers = getTeamMembersFromIndices(data.t);
-  const runwayText = formatRunwayForShare(data.r);
-  const baseUrl = new URL(request.url).origin;
+    const teamMembers = getTeamMembersFromIndices(data.t);
+    if (teamMembers.length === 0) {
+      return new Response('No team members found', { status: 400 });
+    }
 
-  return new ImageResponse(
+    const runwayText = formatRunwayForShare(data.r);
+    const baseUrl = 'https://series-a-sabotage.vercel.app';
+    const photos = teamMembers.slice(0, 8);
+
+    return new ImageResponse(
     (
       <div
         style={{
@@ -30,15 +36,14 @@ export async function GET(
           justifyContent: 'center',
           backgroundColor: '#F6FF00',
           padding: '40px',
-          fontFamily: 'system-ui, sans-serif',
         }}
       >
         <div
           style={{
-            fontSize: '56px',
+            fontSize: '48px',
             fontWeight: 'bold',
             color: '#0038FF',
-            marginBottom: '16px',
+            marginBottom: '24px',
           }}
         >
           {data.n}
@@ -47,32 +52,32 @@ export async function GET(
         <div
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
+            alignItems: 'center',
             justifyContent: 'center',
-            gap: '16px',
-            marginBottom: '32px',
-            maxWidth: '900px',
+            marginBottom: '24px',
           }}
         >
-          {teamMembers.slice(0, 8).map((member, i) => (
+          {photos.map((member, i) => (
             <div
-              key={member.id}
+              key={i}
               style={{
                 display: 'flex',
-                width: '100px',
-                height: '120px',
+                width: '90px',
+                height: '110px',
                 backgroundColor: 'white',
-                padding: '6px',
-                paddingBottom: '16px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                transform: `rotate(${(i % 2 === 0 ? -1 : 1) * (3 + i % 5)}deg)`,
+                padding: '5px',
+                paddingBottom: '14px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                marginLeft: i === 0 ? '0' : '-20px',
+                zIndex: i,
               }}
             >
               <img
                 src={`${baseUrl}/headshots/${member.avatar}`}
-                width={88}
-                height={88}
-                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                alt={member.name}
+                width={80}
+                height={80}
+                style={{ objectFit: 'cover', width: '80px', height: '80px' }}
               />
             </div>
           ))}
@@ -80,21 +85,20 @@ export async function GET(
 
         <div
           style={{
-            fontSize: '28px',
+            fontSize: '24px',
             color: '#0038FF',
             textAlign: 'center',
-            maxWidth: '1000px',
-            fontStyle: 'italic',
-            marginBottom: '24px',
-            padding: '0 20px',
+            maxWidth: '900px',
+            marginBottom: '20px',
+            padding: '0 40px',
           }}
         >
-          &ldquo;{data.s}&rdquo;
+          &quot;{data.s}&quot;
         </div>
 
         <div
           style={{
-            fontSize: '36px',
+            fontSize: '32px',
             fontWeight: 'bold',
             color: data.r < 3 ? '#dc2626' : '#0038FF',
           }}
@@ -105,10 +109,10 @@ export async function GET(
         <div
           style={{
             position: 'absolute',
-            bottom: '30px',
-            fontSize: '20px',
+            bottom: '24px',
+            fontSize: '18px',
             color: '#0038FF',
-            opacity: 0.6,
+            opacity: 0.5,
           }}
         >
           Series A Sabotage
@@ -119,5 +123,9 @@ export async function GET(
       width: 1200,
       height: 630,
     }
-  );
+    );
+  } catch (e) {
+    console.error('OG Image error:', e);
+    return new Response('Error generating image', { status: 500 });
+  }
 }

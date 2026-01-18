@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Share Not Found' };
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dreamteamrunway.com';
+  const baseUrl = 'https://series-a-sabotage.vercel.app';
   const ogImageUrl = `${baseUrl}/api/og/team/${id}`;
 
   return {
@@ -51,7 +51,7 @@ export default async function SharePage({ params }: Props) {
     return (
       <div className="min-h-screen bg-highlight-yellow flex items-center justify-center">
         <div className="text-center">
-          <h1 className="font-serif text-4xl text-royal-blue mb-4">Share Not Found</h1>
+          <h1 className="font-serif text-4xl text-royal-blue mb-4">Page Not Found</h1>
           <Link href="/" className="text-royal-blue underline">
             Build your own dream team
           </Link>
