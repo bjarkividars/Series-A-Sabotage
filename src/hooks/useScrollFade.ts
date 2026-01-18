@@ -24,12 +24,16 @@ export function useScrollFade(containerRef: React.RefObject<HTMLElement | null>)
     if (!container) return;
 
     const viewportWidth = window.innerWidth;
+    const isMobile = viewportWidth < 768;
     const maxContainerWidth = 87.5 * 16;
     const containerPadding = Math.min(Math.max(20, viewportWidth * 0.04), 40);
 
     const contentWidth = Math.min(viewportWidth, maxContainerWidth);
     const contentLeft = (viewportWidth - contentWidth) / 2 + containerPadding;
     const contentRight = viewportWidth - (viewportWidth - contentWidth) / 2 - containerPadding;
+
+    // On mobile, start the fade earlier (further off-screen) so cards are more visible when peeking
+    const fadeStartOffset = isMobile ? 150 : 0;
 
     cardRefs.current.forEach((card, index) => {
       const cardRect = card.getBoundingClientRect();
@@ -38,18 +42,26 @@ export function useScrollFade(containerRef: React.RefObject<HTMLElement | null>)
 
       let visibility = 1;
 
-      if (cardLeft < contentLeft) {
-        visibility = Math.max(0, cardLeft / contentLeft);
-      } else if (cardRight > contentRight) {
-        const overshoot = cardRight - contentRight;
-        const fadeDistance = viewportWidth - contentRight;
-        visibility = Math.max(0, 1 - (overshoot / fadeDistance));
+      // On mobile, use a smaller fade zone so cards appear faster
+      const fadeMultiplier = isMobile ? 0.2 : 1;
+
+      if (cardLeft < contentLeft - fadeStartOffset) {
+        const fadeZone = contentLeft * fadeMultiplier;
+        visibility = Math.max(0, Math.min(1, (cardLeft + fadeStartOffset) / fadeZone));
+      } else if (cardRight > contentRight + fadeStartOffset) {
+        const overshoot = cardRight - (contentRight + fadeStartOffset);
+        const fadeDistance = (viewportWidth - contentRight) * fadeMultiplier;
+        visibility = Math.max(0, Math.min(1, 1 - (overshoot / fadeDistance)));
       }
 
       const eased = visibility * visibility * (3 - 2 * visibility);
 
-      const scale = 0.85 + eased * 0.15;
-      const opacity = eased;
+      // On mobile, keep cards more visible so you always see a peek of the next one
+      const minOpacity =  0;
+      const minScale = 0.85;
+
+      const scale = minScale + eased * (1 - minScale);
+      const opacity = minOpacity + eased * (1 - minOpacity);
 
       stylesRef.current.set(index, { scale, opacity });
 

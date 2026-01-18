@@ -105,7 +105,7 @@ export function DialogContent({
           ${className}
         `}
       >
-        <div className={fullScreen ? "p-8 md:p-16 flex items-center justify-center min-h-screen" : "flex-1 min-h-0 overflow-y-auto p-6 md:p-8"}>
+        <div className={fullScreen ? "p-8 md:p-16 flex items-center justify-center min-h-dvh" : "flex-1 min-h-0 overflow-y-auto p-6 md:p-8"}>
           {/* Close button */}
           {showClose && (
             <BaseDialog.Close

@@ -14,7 +14,7 @@ export default function Home() {
   const showOnboarding = isClient && !hasCompletedOnboarding;
 
   return (
-    <div className="relative h-screen overflow-y-auto">
+    <div className="relative h-dvh overflow-y-auto">
       <AmbientBackground />
 
       <header className="border-b border-white/10">

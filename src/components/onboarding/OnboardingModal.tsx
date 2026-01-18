@@ -16,6 +16,7 @@ const SUBTITLE_TEXT = 'Every hire is a decision. Every decision is a mistake.';
 const TYPING_SPEED = 60;
 const SPACE_DELAY = 150;
 const PERIOD_DELAY = 400;
+const STARTUP_PLACEHOLDERS = ['Uber', 'Airbnb', 'Stripe', 'Dropbox', 'WeWork', 'Theranos'];
 
 export function OnboardingModal({
   open,
@@ -36,6 +37,7 @@ export function OnboardingModal({
   const [showFundingField, setShowFundingField] = useState(false);
   const [showButton, setShowButton] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(isEditing);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   useEffect(() => {
     if (!open || isEditing) {
@@ -45,6 +47,14 @@ export function OnboardingModal({
       setShowButton(true);
       return;
     }
+
+    // Reset animation states
+    setTitleText('');
+    setSubtitleText('');
+    setShowNameField(false);
+    setShowFundingField(false);
+    setShowButton(false);
+    setAnimationComplete(false);
 
     let titleIndex = 0;
     let subtitleIndex = 0;
@@ -110,6 +120,16 @@ export function OnboardingModal({
       clearTimeout(buttonTimeout);
     };
   }, [open, isEditing]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const interval = setInterval(() => {
+      setPlaceholderIndex(prev => (prev + 1) % STARTUP_PLACEHOLDERS.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [open]);
 
   const formatNumberWithCommas = (value: string): string => {
     const digitsOnly = value.replace(/\D/g, '');
@@ -208,7 +228,7 @@ export function OnboardingModal({
                   setStartupName(e.target.value);
                   setErrors(prev => ({ ...prev, name: '' }));
                 }}
-                placeholder="Enter your startup name"
+                placeholder={STARTUP_PLACEHOLDERS[placeholderIndex]}
                 className="
                 w-full
                 text-5xl md:text-7xl
@@ -284,9 +304,9 @@ export function OnboardingModal({
                 type="submit"
                 disabled={!isFormValid}
                 className="
+                btn-primary
+                flex items-center justify-center
                 w-full
-                bg-royal-blue
-                text-highlight-yellow
                 rounded-full
                 py-6
                 text-xl
