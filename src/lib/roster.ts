@@ -12,10 +12,10 @@ export interface TeamMember {
     id: string;
     name: string;
     role: RoleCategory;
-    annualSalary: number; 
+    annualSalary: number;
     buff: string;
     debuff: string;
-    avatar: string; 
+    avatar: string;
     audioPath?: string;
 }
 
@@ -330,7 +330,7 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         id: "sale-usedcar",
         name: "Used Car Salesman",
         role: "Sales",
-        annualSalary: 350000,
+        annualSalary: 80000,
         buff: "Closes deals on the spot through pure pressure.",
         debuff: "Customers regret everything five minutes later.",
         avatar: "car-salesman.png"
