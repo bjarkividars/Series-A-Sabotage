@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { decodeShareData, getTeamMembersFromIndices, formatRunwayForShare } from '@/lib/share';
+import { decodeShareData, getTeamMembersFromIndices } from '@/lib/share';
 
 export const runtime = 'edge';
 
@@ -38,9 +38,10 @@ export async function GET(
       return new Response('No team members found', { status: 400 });
     }
 
-    const runwayText = formatRunwayForShare(data.r);
+    const runwayText = data.r;
     const summaryText = `"${data.s}"`;
     const sabotageText = `Sabotaged in ${runwayText}`;
+    const isShortRunway = /^(\d+\s*(second|minute|hour|day)s?)/.test(runwayText) && !/year|month/.test(runwayText);
     const baseUrl = 'https://series-a-sabotage.vercel.app';
     const photos = teamMembers.slice(0, 8);
     const origin = new URL(request.url).origin;
@@ -131,7 +132,7 @@ export async function GET(
           style={{
             fontSize: '32px',
             fontWeight: 700,
-            color: data.r < 3 ? '#dc2626' : '#0038FF',
+            color: isShortRunway ? '#dc2626' : '#0038FF',
           }}
         >
           {sabotageText}

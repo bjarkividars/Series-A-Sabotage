@@ -7,7 +7,7 @@ import { PhotoCollage } from './PhotoCollage';
 import { WarpAd } from './WarpAd';
 import { ShareModal } from './ShareModal';
 import { useTeamAnalysis } from '@/hooks/useTeamAnalysis';
-import { encodeShareData, formatRunwayForShare } from '@/lib/share';
+import { encodeShareData } from '@/lib/share';
 
 interface TeamOverviewModalProps {
   open: boolean;
@@ -39,15 +39,14 @@ export function TeamOverviewModal({ open, onOpenChange }: TeamOverviewModalProps
       startupName,
       oneLineSummary,
       mode,
-      runway
+      getRunwayDisplay()
     );
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     return `${baseUrl}/share/${encoded}`;
   };
 
   const getTweetText = () => {
-    const runwayText = formatRunwayForShare(runway);
-    return `My ${startupName} dream team was sabotaged in ${runwayText}! "${oneLineSummary}"`;
+    return `My ${startupName} dream team was sabotaged in ${getRunwayDisplay()}! "${oneLineSummary}"`;
   };
 
   const getRunwayDisplay = () => {

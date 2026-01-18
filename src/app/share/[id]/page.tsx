@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { decodeShareData, getTeamMembersFromIndices, formatRunwayForShare } from '@/lib/share';
+import { decodeShareData, getTeamMembersFromIndices } from '@/lib/share';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -61,7 +61,7 @@ export default async function SharePage({ params }: Props) {
   }
 
   const teamMembers = getTeamMembersFromIndices(data.t);
-  const runwayText = formatRunwayForShare(data.r);
+  const runwayText = data.r;
 
   return (
     <div className="min-h-screen bg-highlight-yellow">

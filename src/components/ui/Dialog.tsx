@@ -49,8 +49,8 @@ export function DialogContent({
           fixed inset-0 z-50
           bg-black/70 backdrop-blur-sm
           transition-opacity duration-200
-          data-[starting-style]:opacity-0
-          data-[ending-style]:opacity-0
+          data-starting-style:opacity-0
+          data-ending-style:opacity-0
         "
       />
       <BaseDialog.Popup
@@ -63,8 +63,8 @@ export function DialogContent({
           ${fullScreen ? `
             inset-0
             transition-opacity duration-200
-            data-[starting-style]:opacity-0
-            data-[ending-style]:opacity-0
+            data-starting-style:opacity-0
+            data-ending-style:opacity-0
           ` : `
             bottom-0 left-0 right-0
             max-md:rounded-t-3xl
@@ -82,16 +82,16 @@ export function DialogContent({
             transition-all duration-200
 
             opacity-100
-            data-[starting-style]:opacity-0
-            data-[ending-style]:opacity-0
+            data-starting-style:opacity-0
+            data-ending-style:opacity-0
 
             max-md:translate-y-0
-            max-md:data-[starting-style]:translate-y-full
-            max-md:data-[ending-style]:translate-y-full
+            max-md:data-starting-style:translate-y-full
+            max-md:data-ending-style:translate-y-full
 
             md:scale-100
-            md:data-[starting-style]:scale-95
-            md:data-[ending-style]:scale-95
+            md:data-starting-style:scale-95
+            md:data-ending-style:scale-95
           `}
 
           ${className}
