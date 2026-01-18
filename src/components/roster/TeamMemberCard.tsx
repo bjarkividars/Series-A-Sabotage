@@ -1,11 +1,14 @@
 'use client';
 
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, useRef } from 'react';
 import Image from 'next/image';
 import { TeamMember } from '@/types';
 import { useTeam } from '@/contexts/TeamContext';
 import { formatCurrency } from '@/lib/format-currency';
 import { createExplosion } from '@/lib/particle-explosion';
+import { playMemberAudio } from '@/lib/audio';
+import { createFloatingQuote } from '@/lib/floating-quote';
+import { createSnoopEffect } from '@/lib/snoop-effect';
 
 interface TeamMemberCardProps {
   member: TeamMember;
@@ -19,6 +22,7 @@ export const TeamMemberCard = forwardRef<HTMLDivElement, TeamMemberCardProps>(
     const isSelected = selectedIds.has(member.id);
     const displaySalary = `${formatCurrency(member.annualSalary)}/yr`;
     const [bounceTransform, setBounceTransform] = useState('scale(1) rotate(0deg)');
+    const avatarRef = useRef<HTMLDivElement>(null);
 
     return (
       <div
@@ -34,6 +38,7 @@ export const TeamMemberCard = forwardRef<HTMLDivElement, TeamMemberCardProps>(
       >
         {/* Avatar */}
         <div
+          ref={avatarRef}
           className="w-full h-40 md:h-56 rounded-t-lg flex items-center justify-center overflow-hidden relative"
           style={{
             transform: bounceTransform,
@@ -80,12 +85,24 @@ export const TeamMemberCard = forwardRef<HTMLDivElement, TeamMemberCardProps>(
                 e.stopPropagation();
                 if (isSelected) {
                   removeMember(member.id);
+                } else if (member.id === 'dog-snoop' && avatarRef.current) {
+                  createSnoopEffect(avatarRef.current, () => {
+                    addMember(member);
+                  });
                 } else {
                   const randomScale = 1.02 + Math.random() * 0.06;
                   const randomRotation = (Math.random() - 0.5) * 16;
 
                   setBounceTransform(`scale(${randomScale}) rotate(${randomRotation}deg)`);
                   createExplosion(e.clientX, e.clientY);
+
+                  if (member.audioPath) {
+                    playMemberAudio(member.audioPath);
+                  }
+                  if (member.quote) {
+                    createFloatingQuote(member.quote, e.clientX, e.clientY - 60);
+                  }
+
                   addMember(member);
 
                   setTimeout(() => setBounceTransform('scale(1) rotate(0deg)'), 300);

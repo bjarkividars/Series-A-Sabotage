@@ -17,6 +17,7 @@ export interface TeamMember {
     debuff: string;
     avatar: string;
     audioPath?: string;
+    quote?: string;
 }
 
 export const DREAM_TEAM_OPTIONS: TeamMember[] = [
@@ -37,7 +38,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 100000000,
         buff: "Supply chain runs like clockwork.",
         debuff: "Kills every idea that isn't incrementally better than last year's idea.",
-        avatar: "cook.png"
+        avatar: "cook.png",
+        audioPath: "good-morning",
+        quote: "Good Morning"
     },
     {
         id: "ceo-barra",
@@ -55,7 +58,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 60000000,
         buff: "Competitors are terrified.",
         debuff: "HR lawsuits increase 400%.",
-        avatar: "logan-roy.png"
+        avatar: "logan-roy.png",
+        audioPath: "roy",
+        quote: "I'm back"
     },
     {
         id: "ceo-leslie",
@@ -64,7 +69,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 95000,
         buff: "Team morale is absurdly high. Has personalized binders for every employee.",
         debuff: "Mandatory fun takes up 40% of work hours. 847 unread celebration emails.",
-        avatar: "knope.png"
+        avatar: "knope.png",
+        audioPath: "knope",
+        quote: "I am often inspired by myself"
     },
     {
         id: "ceo-stark",
@@ -73,7 +80,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 180000000,
         buff: "Breakthrough tech years ahead of competitors.",
         debuff: "Office destroyed by supervillain monthly.",
-        avatar: "stark.png"
+        avatar: "stark.png",
+        audioPath: "stark",
+        quote: "Oh, great"
     },
     {
         id: "ceo-holmes",
@@ -165,7 +174,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 600000,
         buff: "Servers never go down.",
         debuff: "Mines Bitcoin on company hardware.",
-        avatar: "gilfoyle.png"
+        avatar: "gilfoyle.png",
+        audioPath: "gilfoyle",
+        quote: "I feel I should get more equity"
     },
     {
         id: "eng-bighead",
@@ -194,7 +205,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 6000000,
         buff: "World-class branding.",
         debuff: "Fires anyone wearing a cape.",
-        avatar: "edna.png"
+        avatar: "edna.png",
+        audioPath: "edna",
+        quote: "NO CAPES!"
     },
     {
         id: "des-anderson",
@@ -286,7 +299,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 15000000,
         buff: "Unmatched attention, influence, and access to the right people.",
         debuff: "Still technically becoming a lawyer.",
-        avatar: "kim.png"
+        avatar: "kim.png",
+        audioPath: "kim",
+        quote: "Get your f**king @$$ up and work"
     },
     {
         id: "law-chatgpt",
@@ -306,7 +321,9 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 240000000,
         buff: "100M users in 10 minutes.",
         debuff: "Might give your startup away in a challenge.",
-        avatar: "beast.png"
+        avatar: "beast.png",
+        audioPath: "beast",
+        quote: "I'm sitting on five million dollars in cash"
     },
     {
         id: "sale-gc",
@@ -371,7 +388,8 @@ export const DREAM_TEAM_OPTIONS: TeamMember[] = [
         annualSalary: 24000000,
         buff: "Startup is now officially 'cool'.",
         debuff: "Smoke sets off fire sprinklers daily.",
-        avatar: "snoop.png"
+        avatar: "snoop.png",
+        audioPath: "snoop",
     },
     {
         id: "dog-crusty",
