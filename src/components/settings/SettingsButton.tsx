@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
-import { useOnboardingState } from '@/hooks/useOnboardingState';
+import { useTeam } from '@/contexts/TeamContext';
 
 export function SettingsButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { startupName, startingCapital, updateOnboarding } = useOnboardingState();
+  const { startupName, startingCapital, updateOnboarding } = useTeam();
 
   const handleSave = (name: string, capital: number) => {
     updateOnboarding(name, capital);

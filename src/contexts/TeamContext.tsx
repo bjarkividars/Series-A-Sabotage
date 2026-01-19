@@ -2,13 +2,20 @@
 
 import { createContext, useContext, useMemo, ReactNode } from 'react';
 import { TeamMember } from '@/types';
-import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+
+interface OnboardingData {
+  startupName: string;
+  startingCapital: number;
+  hasCompletedOnboarding: boolean;
+}
 
 interface TeamContextValue {
   selectedTeam: TeamMember[];
   startupName: string;
   startingCapital: number;
+  hasCompletedOnboarding: boolean;
+  isClient: boolean;
   monthlyBurn: number;
   annualBurn: number;
   runway: number;
@@ -16,6 +23,9 @@ interface TeamContextValue {
   addMember: (member: TeamMember) => void;
   removeMember: (memberId: string) => void;
   resetTeam: () => void;
+  saveOnboarding: (startupName: string, startingCapital: number) => void;
+  updateOnboarding: (startupName: string, startingCapital: number) => void;
+  resetOnboarding: () => void;
 }
 
 const TeamContext = createContext<TeamContextValue | undefined>(undefined);
@@ -25,11 +35,23 @@ interface TeamProviderProps {
 }
 
 const TEAM_STORAGE_KEY = 'dream-team-selected';
+const ONBOARDING_STORAGE_KEY = 'dream-team-onboarding';
+const DEFAULT_ONBOARDING: OnboardingData = {
+  startupName: '',
+  startingCapital: 0,
+  hasCompletedOnboarding: false,
+};
 
 export function TeamProvider({ children }: TeamProviderProps) {
-  const { startupName, startingCapital: savedCapital } = useOnboardingState();
+  const [onboarding, setOnboarding, isClient] = useLocalStorage<OnboardingData>(
+    ONBOARDING_STORAGE_KEY,
+    DEFAULT_ONBOARDING
+  );
   const [selectedTeam, setSelectedTeam] = useLocalStorage<TeamMember[]>(TEAM_STORAGE_KEY, []);
 
+  const startupName = onboarding.startupName;
+  const savedCapital = onboarding.startingCapital;
+  const hasCompletedOnboarding = onboarding.hasCompletedOnboarding;
   const startingCapital = savedCapital > 0 ? savedCapital : 10_000_000;
 
   const { monthlyBurn, annualBurn, runway, selectedIds } = useMemo(() => {
@@ -61,10 +83,32 @@ export function TeamProvider({ children }: TeamProviderProps) {
     setSelectedTeam([]);
   };
 
+  const saveOnboarding = (name: string, capital: number) => {
+    setOnboarding({
+      startupName: name,
+      startingCapital: capital,
+      hasCompletedOnboarding: true,
+    });
+  };
+
+  const updateOnboarding = (name: string, capital: number) => {
+    setOnboarding((prev) => ({
+      ...prev,
+      startupName: name,
+      startingCapital: capital,
+    }));
+  };
+
+  const resetOnboarding = () => {
+    setOnboarding(DEFAULT_ONBOARDING);
+  };
+
   const value: TeamContextValue = {
     selectedTeam,
     startupName,
     startingCapital,
+    hasCompletedOnboarding,
+    isClient,
     monthlyBurn,
     annualBurn,
     runway,
@@ -72,6 +116,9 @@ export function TeamProvider({ children }: TeamProviderProps) {
     addMember,
     removeMember,
     resetTeam,
+    saveOnboarding,
+    updateOnboarding,
+    resetOnboarding,
   };
 
   return <TeamContext.Provider value={value}>{children}</TeamContext.Provider>;

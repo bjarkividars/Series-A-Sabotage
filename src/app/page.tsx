@@ -6,10 +6,10 @@ import { CountdownClock } from '@/components/countdown/CountdownClock';
 import { RosterGrid } from '@/components/roster/RosterGrid';
 import { FloatingTeamButton } from '@/components/team/FloatingTeamButton';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
-import { useOnboardingState } from '@/hooks/useOnboardingState';
+import { useTeam } from '@/contexts/TeamContext';
 
 export default function Home() {
-  const { hasCompletedOnboarding, saveOnboarding, isClient } = useOnboardingState();
+  const { hasCompletedOnboarding, saveOnboarding, isClient } = useTeam();
 
   const showOnboarding = isClient && !hasCompletedOnboarding;
 
